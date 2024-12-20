@@ -1,0 +1,34 @@
+services:
+  load-balancer:
+    image: oliverlundquist/load-balancer-example:${NGINX_TAG}
+    build:
+      dockerfile: docker/load-balancer/load-balancer
+      args:
+        NGINX_TAG: ${NGINX_TAG}
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/app/current
+    networks:
+      - php-app
+  php-cluster-1:
+    image: oliverlundquist/php-cluster-example:${NGINX_TAG}
+    build:
+      dockerfile: docker/php-cluster/php-cluster
+      args:
+        NGINX_TAG: ${NGINX_TAG}
+    volumes:
+      - .:/var/app/current
+    networks:
+      - php-app
+  php:
+    image: oliverlundquist/php84-opcache:8.4.1
+    environment:
+      VALIDATE_TIMESTAMPS: 1
+    volumes:
+      - .:/var/app/current
+    networks:
+      - php-app
+networks:
+  php-app:
+    driver: bridge
